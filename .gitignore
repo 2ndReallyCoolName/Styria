@@ -1,0 +1,24 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/Styria
+/Styria/bin
+/Styria/obj
+/Styria/Images
+/Styria.API/bin
+/Styria.API/obj
+/Styria.Model/bin
+/Styria.Model/obj
+/Styria/Styria.csproj
+/Styria/packages.config
+/Styria.API/Migrations/*Create*
+/Styria.API/Properties
+/Styria.API/*.csproj
+/Styria.Model/*.csproj
+/packages
+/Debug
+/x64
+/Styria.sln
+/.vs
+*.obj
