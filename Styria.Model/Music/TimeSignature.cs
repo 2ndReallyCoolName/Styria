@@ -15,6 +15,7 @@ namespace Styria.Model.Music
         [Required]
         public int Beats { get; set; }
 
+        [Required]
         public int NoteValue { get; set; }
 
         public List<Tab>? Tabs { get; set; }
