@@ -10,6 +10,8 @@ namespace Styria.API.Models.Repositories
         Task<TimeSignature> AddTimeSignature(TimeSignature TimeSignature);
         Task<TimeSignature?> UpdateTimeSignature(TimeSignature TimeSignature);
         void DeleteTimeSignature(int id);
+
+        Task<bool> Exists(int id);
     }
     public class TimeSignatureRepository : ITimeSignatureRepository
     {
@@ -34,6 +36,11 @@ namespace Styria.API.Models.Repositories
                 _dbContext.TimeSignatures.Remove(result);
                 await _dbContext.SaveChangesAsync();
             }
+        }
+
+        public async Task<bool> Exists(int id)
+        {
+            return await _dbContext.TimeSignatures.AnyAsync(e => e.TimeSignatureID == id);
         }
 
         public async Task<TimeSignature> GetTimeSignature(int id)

@@ -9,7 +9,9 @@ namespace Styria.API.Models.Repositories
         Task<Tab> GetTab(int id);
         Task<Tab> AddTab(Tab tab);
         Task<Tab?> UpdateTab(Tab tab);
-        void DeleteTab(int id);
+        Task DeleteTab(int id);
+
+        Task<bool> Exists(int id);
     }
 
     public class TabRepository : ITabRepository
@@ -29,7 +31,7 @@ namespace Styria.API.Models.Repositories
             return result.Entity;
         }
 
-        public async void DeleteTab(int id)
+        public async Task DeleteTab(int id)
         {
             var result = await _dbContext.Tabs.FirstOrDefaultAsync(e => e.ID == id);
             if (result != null)
@@ -37,6 +39,11 @@ namespace Styria.API.Models.Repositories
                 _dbContext.Tabs.Remove(result);
                 await _dbContext.SaveChangesAsync();
             }
+        }
+
+        public async Task<bool> Exists(int id)
+        {
+            return await _dbContext.Tabs.AnyAsync(e => e.ID == id);
         }
 
         public async Task<Tab> GetTab(int id)
