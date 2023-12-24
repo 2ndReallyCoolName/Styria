@@ -49,11 +49,13 @@ namespace Styria.API.Controllers
             {
                 if(tab == null || tab.TabNotes == null) { return BadRequest(); }
 
-                foreach(var tabNote in tab.TabNotes)
+                var result = await _tabRepository.AddTab(tab);
+
+                foreach (var tabNote in tab.TabNotes)
                 {
                     if(! await _tabNoteRepository.Exists(tabNote.ID))
                     {
-                        if(tabNote.TabID != tab.ID) { return BadRequest(); }
+                        tabNote.TabID = tab.ID;
                         await _tabNoteRepository.AddTabNote(tabNote);
                     }
                 }
@@ -71,7 +73,6 @@ namespace Styria.API.Controllers
                     await _timeSignatureRepository.AddTimeSignature(tab.TimeSignature);
                 }
 
-                var result = await _tabRepository.AddTab(tab);
 
                 return CreatedAtAction(nameof(GetTab), new {ID = result.ID}, result);
             }
@@ -117,7 +118,7 @@ namespace Styria.API.Controllers
 
                 foreach(TabNote tabNote in tabNotes)
                 {
-                    _tabNoteRepository.DeleteTabNote(tabNote.ID);
+                    await _tabNoteRepository.DeleteTabNote(tabNote.ID);
                 }
 
                 await _tabRepository.DeleteTab(id);

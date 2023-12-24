@@ -48,12 +48,12 @@ namespace Styria.API.Models.Repositories
 
         public async Task<Tab> GetTab(int id)
         {
-            return await _dbContext.Tabs.FirstOrDefaultAsync(x => x.ID == id) ?? new Tab();
+            return await _dbContext.Tabs.Include(x => x.TabNotes).Include(x => x.TimeSignature).FirstOrDefaultAsync(x => x.ID == id) ?? new Tab();
         }
 
         public async Task<Tab> GetTabBySong(int songId)
         {
-            return await _dbContext.Tabs.FirstOrDefaultAsync(x => x.SongID == songId) ?? new Tab();
+            return await _dbContext.Tabs.Include(x => x.TabNotes).Include(x => x.TimeSignature).FirstOrDefaultAsync(x => x.SongID == songId) ?? new Tab();
         }
 
         public async Task<Tab?> UpdateTab(Tab tab)

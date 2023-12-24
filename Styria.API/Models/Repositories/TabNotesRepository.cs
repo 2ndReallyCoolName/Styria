@@ -9,7 +9,7 @@ namespace Styria.API.Models.Repositories
         Task<TabNote> GetTabNote(int id);
         Task<TabNote> AddTabNote(TabNote tabNote);
         Task<TabNote?> UpdateTabNote(TabNote tabNote);
-        void DeleteTabNote(int id);
+        Task DeleteTabNote(int id);
 
         Task<bool> Exists(int id);
     }
@@ -41,7 +41,7 @@ namespace Styria.API.Models.Repositories
             return result.Entity;
         }
 
-        public async void DeleteTabNote(int id)
+        public async Task DeleteTabNote(int id)
         {
             var result = await _dbContext.TabNotes.FirstOrDefaultAsync(e => e.ID == id);
             if (result != null)
