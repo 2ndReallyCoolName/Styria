@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Styria.API.Models.Repositories;
+using Styria.Model.Intermediate;
 using Styria.Model.Music;
 using System.Runtime.CompilerServices;
 
@@ -11,15 +12,13 @@ namespace Styria.API.Controllers
     {
         private readonly ITabRepository _tabRepository;
         private readonly ITabNoteRepository _tabNoteRepository;
-        private readonly INoteRepository _noteRepository;
-        private readonly ITimeSignatureRepository  _timeSignatureRepository;
+        private readonly ITimeSignatureRepository _timeSignatureRepository;
 
-        public TabController(ITabRepository tabRepository, ITabNoteRepository tabNoteRepository, 
+        public TabController(ITabRepository tabRepository, ITabNoteRepository tabNoteRepository,
             INoteRepository noteRepository, ITimeSignatureRepository timeSignatureRepository)
         {
             _tabRepository = tabRepository;
             _tabNoteRepository = tabNoteRepository;
-            _noteRepository = noteRepository;   
             _timeSignatureRepository = timeSignatureRepository;
         }
 
@@ -28,15 +27,29 @@ namespace Styria.API.Controllers
         {
             try
             {
-                var result = await _tabRepository.GetTab(id);  
-                if(result == null)
+                var result = await _tabRepository.GetTab(id);
+                if (result == null)
                 {
                     return NotFound();
                 }
 
                 return Ok(result);
             }
-            catch(Exception ex)
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("{id:int}/notes")]
+        public async Task<ActionResult<IEnumerable<TabNoteObject>>> GetNotes(int id) {
+            try
+            {
+                var result = await _tabRepository.GetTabNotes(id);
+
+                return Ok(result);
+
+            }catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
@@ -52,7 +65,7 @@ namespace Styria.API.Controllers
                 var result = await _tabRepository.AddTab(tab);
 
                 foreach (var tabNote in tab.TabNotes)
-                {
+                { 
                     if(! await _tabNoteRepository.Exists(tabNote.ID))
                     {
                         tabNote.TabID = tab.ID;
@@ -73,7 +86,7 @@ namespace Styria.API.Controllers
                     await _timeSignatureRepository.AddTimeSignature(tab.TimeSignature);
                 }
 
-
+                
                 return CreatedAtAction(nameof(GetTab), new {ID = result.ID}, result);
             }
             catch (Exception ex)

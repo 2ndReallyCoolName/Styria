@@ -13,6 +13,7 @@
 /Styria/Styria.csproj
 /Styria/packages.config
 /Styria.API/Migrations/*Create*
+/Styria.API/Migrations/*Snapshot*
 /Styria.API/Properties
 /Styria.API/*.csproj
 /Styria.Model/*.csproj

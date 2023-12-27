@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Styria.Model.Intermediate;
 using Styria.Model.Music;
 
 namespace Styria.API.Models.Repositories
@@ -7,10 +8,11 @@ namespace Styria.API.Models.Repositories
     {
         Task<IEnumerable<TabNote>> GetTabNotesByTabID(int tabId);
         Task<TabNote> GetTabNote(int id);
+        Task<IEnumerable<Note?>> GetNotes(int id);
         Task<TabNote> AddTabNote(TabNote tabNote);
         Task<TabNote?> UpdateTabNote(TabNote tabNote);
+        Task<TabNoteObject> UpdateNotes(TabNoteObject tabNoteObject);
         Task DeleteTabNote(int id);
-
         Task<bool> Exists(int id);
     }
 
@@ -29,12 +31,12 @@ namespace Styria.API.Models.Repositories
             var result = await _dbContext.TabNotes.AddAsync(tabNote);
             await _dbContext.SaveChangesAsync();
 
-            foreach(NoteTabNote noteTabNote in tabNote.NoteTabNotes)
-            {
-                noteTabNote.TabNoteID = tabNote.ID;
-                noteTabNote.TabNote = tabNote;
-                await _dbContext.NoteTabNotes.AddAsync(noteTabNote);
-            }
+            //foreach(NoteTabNote noteTabNote in tabNote.NoteTabNotes)
+            //{
+            //    noteTabNote.TabNoteID = tabNote.ID;
+            //    noteTabNote.TabNote = tabNote;
+            //    await _dbContext.NoteTabNotes.AddAsync(noteTabNote);
+            //}
 
             await _dbContext.SaveChangesAsync();
 
@@ -46,12 +48,12 @@ namespace Styria.API.Models.Repositories
             var result = await _dbContext.TabNotes.FirstOrDefaultAsync(e => e.ID == id);
             if (result != null)
             {
-                IEnumerable<NoteTabNote> noteTabNotes = await _dbContext.NoteTabNotes.Where(e => e.TabNoteID == id).ToListAsync();
+                //IEnumerable<NoteTabNote> noteTabNotes = await _dbContext.NoteTabNotes.Where(e => e.TabNoteID == id).ToListAsync();
 
-                foreach(NoteTabNote noteTab in noteTabNotes)
-                {
-                    _dbContext.NoteTabNotes.Remove(noteTab);
-                }
+                //foreach(NoteTabNote noteTab in noteTabNotes)
+                //{
+                //    _dbContext.NoteTabNotes.Remove(noteTab);
+                //}
 
                 _dbContext.TabNotes.Remove(result);
                 await _dbContext.SaveChangesAsync();
@@ -60,7 +62,7 @@ namespace Styria.API.Models.Repositories
 
         public async Task<TabNote> GetTabNote(int id)
         {
-            return await _dbContext.TabNotes.FirstOrDefaultAsync(x => x.ID == id) ?? new TabNote();
+            return await _dbContext.TabNotes.Include(e => e.Effect).FirstOrDefaultAsync(x => x.ID == id) ?? new TabNote();
         }
 
         public async Task<IEnumerable<TabNote>> GetTabNotesByTabID(int tabId)
@@ -86,6 +88,33 @@ namespace Styria.API.Models.Repositories
                 return result;
             }
             return null;
+        }
+
+        public async Task<IEnumerable<Note?>> GetNotes(int id)
+        {
+            return await _dbContext.TabNotes.Where(e => e.ID == id).Include(e => e.Notes).SelectMany(e => e.Notes).ToListAsync() ?? new List<Note>();
+        }
+
+        public async Task< TabNoteObject> UpdateNotes(TabNoteObject tabNoteObject)
+        {
+            //IEnumerable<NoteTabNote> noteTabNotes = await _dbContext.TabN.Where(e => e.TabNoteID == tabNoteObject.TabNoteID).ToListAsync();
+
+            //foreach (NoteTabNote noteTab in noteTabNotes)
+            //{
+            //    _dbContext.NoteTabNotes.Remove(noteTab);
+            //}
+
+            foreach(Note note in tabNoteObject.Notes)
+            {
+                Note _n = await _dbContext.Notes.FirstOrDefaultAsync(e => e.String == note.String && e.TypeID == note.TypeID && e.Fret == note.Fret) ?? new Note();
+                //if(_n != null)
+                //{
+                //    await _dbContext.NoteTabNotes.AddAsync(new NoteTabNote { NoteID = _n.ID, TabNoteID = tabNoteObject.TabNoteID});
+                //}
+            }
+
+            return new TabNoteObject();
+
         }
     }
 }

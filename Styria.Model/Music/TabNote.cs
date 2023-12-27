@@ -11,6 +11,7 @@ namespace Styria.Model.Music
     {
         public int ID { get; set; }
 
+        [Required]
         public int Duration { get; set; }
 
         [Required]
@@ -22,6 +23,6 @@ namespace Styria.Model.Music
         public int TabID { get; set; }
         public Tab? Tab { get; set; }
 
-        public List<NoteTabNote> NoteTabNotes { get; set; } = new();
+        public List<Note> Notes { get; set; } = new();
     }
 }

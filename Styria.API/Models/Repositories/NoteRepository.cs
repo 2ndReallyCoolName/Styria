@@ -52,7 +52,7 @@ namespace Styria.API.Models.Repositories
 
         public async Task<IEnumerable<Note>> GetNotesByTabNoteID(int tabNoteID)
         {
-            return await _dbContext.Notes.Where(e => e.NoteTabNotes.All(x => x.TabNoteID == tabNoteID)).ToListAsync();
+            return await _dbContext.TabNotes.Where(e => e.ID == tabNoteID).Include(e => e.Notes).SelectMany(e => e.Notes).ToListAsync();
         }
 
         public async Task<Note?> UpdateNote(Note Note)

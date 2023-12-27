@@ -4,6 +4,8 @@ using Styria.Model.Music;
 using Type = Styria.Model.Music.Type;
 using Styria.Model.Song;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Diagnostics.Metrics;
+using Instrument = Styria.Model.Song.Instrument;
 
 namespace Styria.API.Models
 {
@@ -16,7 +18,6 @@ namespace Styria.API.Models
 
         public DbSet<Effect> Effects { get; set; }
         public DbSet<Note> Notes { get; set; }
-        public DbSet<NoteTabNote> NoteTabNotes { get; set; }
         public DbSet<Tab> Tabs { get; set; }
         public DbSet<TabNote> TabNotes { get; set; }
         public DbSet<TimeSignature> TimeSignatures { get; set; }
@@ -39,7 +40,7 @@ namespace Styria.API.Models
             modelBuilder.Entity<Song>().HasData(new Song { SongID = 1, Name = "Fairy Tail - Main Theme", ArtistID = 1 });
 
             // Instrument
-            modelBuilder.Entity<Instrument>().HasData(new Instrument { Id = 1, Name = "Overdriven Guitar" });
+            modelBuilder.Entity<Instrument>().HasData(new Model.Song.Instrument { Id = 1, Name = "Overdriven Guitar" });
 
             // Effects
             //modelBuilder.Entity<Effect>().HasMany(e => e.TabNotes).WithOne(e => e.Effect).HasForeignKey(e => e.EffectID).IsRequired();
@@ -83,30 +84,45 @@ namespace Styria.API.Models
             seedNotes(modelBuilder);
 
             // TabNotes
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 1, Duration = 8, Order = 1, TabID = 1, EffectID = 2});
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 2, Duration = 16, Order = 2, TabID = 1, EffectID = 1 });
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 3, Duration = 16, Order = 3, TabID = 1 });
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 4, Duration = 8, Order = 4, TabID = 1});
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 5, Duration = 8, Order = 5, TabID = 1});
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 6, Duration = 8, Order = 6, TabID = 1, EffectID = 7 });
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 7, Duration = 16, Order = 7, TabID = 1, EffectID = 5 });
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 8, Duration = 16, Order = 8, TabID = 1 });
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 9, Duration = 8, Order = 9, TabID = 1});
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 10, Duration = 8, Order = 10, TabID = 1, EffectID = 6});
-            modelBuilder.Entity<TabNote>().HasData(new TabNote { ID = 11, Duration = 8, Order = 11, TabID = 1 });
+            var t1 = new TabNote { ID = 1, Duration = 8, Order = 1, TabID = 1, EffectID = 2};
+            var t2 = new TabNote { ID = 2, Duration = 16, Order = 2, TabID = 1, EffectID = 1 };
+            var t3 = new TabNote { ID = 3, Duration = 16, Order = 3, TabID = 1 };
+            var t4 = new TabNote { ID = 4, Duration = 8, Order = 4, TabID = 1 };
+            var t5 = new TabNote { ID = 5, Duration = 8, Order = 5, TabID = 1 };
+            var t6 = new TabNote { ID = 6, Duration = 8, Order = 6, TabID = 1, EffectID = 7 };
+            var t7 = new TabNote { ID = 7, Duration = 16, Order = 7, TabID = 1, EffectID = 5 };
+            var t8 = new TabNote { ID = 8, Duration = 16, Order = 8, TabID = 1 };
+            var t9 = new TabNote { ID = 9, Duration = 8, Order = 9, TabID = 1 };
+            var t10 = new TabNote { ID = 10, Duration = 8, Order = 10, TabID = 1, EffectID = 6 };
+            var t11 = new TabNote { ID = 11, Duration = 8, Order = 11, TabID = 1 };
 
-            // NoteTabNotes
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 1, TabNoteID= 1,  NoteID = 45 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 2, TabNoteID = 2, NoteID = 57 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 3, TabNoteID = 3, NoteID = 45 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 4, TabNoteID = 4, NoteID = 33 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 5, TabNoteID = 5, NoteID = 46 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 6, TabNoteID = 6, NoteID = 34 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 7, TabNoteID = 7, NoteID = 46 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 8, TabNoteID = 8, NoteID = 33 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 9, TabNoteID = 9, NoteID = 45 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 10, TabNoteID = 10, NoteID = 63 });
-            modelBuilder.Entity<NoteTabNote>().HasData(new NoteTabNote { ID = 11, TabNoteID = 11, NoteID = 57 });
+            modelBuilder.Entity<TabNote>().HasMany(e => e.Notes).WithMany()
+                .UsingEntity(nt => nt.HasData(
+                    new { TabNoteID = 1, NotesID = 45 },
+                    new { TabNoteID = 2, NotesID = 57 },
+                    new { TabNoteID = 3, NotesID = 45 },
+                    new { TabNoteID = 4, NotesID = 33 },
+                    new { TabNoteID = 5, NotesID = 46 },
+                    new { TabNoteID = 6, NotesID = 34 },
+                    new { TabNoteID = 7, NotesID = 46 },
+                    new { TabNoteID = 8, NotesID = 33 },
+                    new { TabNoteID = 9, NotesID = 45 },
+                    new { TabNoteID = 10, NotesID = 63 },
+                    new { TabNoteID = 11, NotesID = 57 }));
+
+
+            modelBuilder.Entity<TabNote>().HasData(t1);
+            modelBuilder.Entity<TabNote>().HasData(t2);
+            modelBuilder.Entity<TabNote>().HasData(t3);
+            modelBuilder.Entity<TabNote>().HasData(t4);
+            modelBuilder.Entity<TabNote>().HasData(t5);
+            modelBuilder.Entity<TabNote>().HasData(t6);
+            modelBuilder.Entity<TabNote>().HasData(t7);
+            modelBuilder.Entity<TabNote>().HasData(t8);
+            modelBuilder.Entity<TabNote>().HasData(t9);
+            modelBuilder.Entity<TabNote>().HasData(t10);
+            modelBuilder.Entity<TabNote>().HasData(t11);
+
 
 
             // Tabs

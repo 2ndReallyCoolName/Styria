@@ -27,7 +27,5 @@ namespace Styria.Model.Music
         public Type? Type { get; set; }
 
         public string SoundFilePath { get; set; } = string.Empty;
-
-        public List<NoteTabNote> NoteTabNotes { get; set; } = new();
     }
 }

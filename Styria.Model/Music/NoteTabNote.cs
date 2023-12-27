@@ -9,7 +9,6 @@ namespace Styria.Model.Music
 {
     public class NoteTabNote
     {
-        public int ID { get; set; }
         [Required]
         public int TabNoteID { get; set; }
         public TabNote? TabNote { get; set; }

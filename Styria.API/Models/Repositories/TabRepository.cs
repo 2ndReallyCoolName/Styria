@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Styria.Model.Intermediate;
 using Styria.Model.Music;
 
 namespace Styria.API.Models.Repositories
@@ -10,8 +11,8 @@ namespace Styria.API.Models.Repositories
         Task<Tab> AddTab(Tab tab);
         Task<Tab?> UpdateTab(Tab tab);
         Task DeleteTab(int id);
-
         Task<bool> Exists(int id);
+        Task<IEnumerable<TabNoteObject>> GetTabNotes(int id);
     }
 
     public class TabRepository : ITabRepository
@@ -54,6 +55,27 @@ namespace Styria.API.Models.Repositories
         public async Task<Tab> GetTabBySong(int songId)
         {
             return await _dbContext.Tabs.Include(x => x.TabNotes).Include(x => x.TimeSignature).FirstOrDefaultAsync(x => x.SongID == songId) ?? new Tab();
+        }
+        
+        public async Task<IEnumerable<TabNoteObject>> GetTabNotes(int id)
+        {
+            IEnumerable<int> tabNoteIDs = await _dbContext.TabNotes.Include(e => e.Effect).Where(e => e.TabID == id).Select(e => e.ID).ToListAsync() ?? new List<int>();
+
+
+            List<TabNoteObject> tabNoteObjects = new List<TabNoteObject>(tabNoteIDs.Count());
+
+            for(int i = 0; i < tabNoteIDs.Count(); i++)
+            {
+                tabNoteObjects.Add(
+                    new TabNoteObject 
+                    {
+                        TabNoteID = tabNoteIDs.ElementAt(i), 
+                        Notes = await _dbContext.TabNotes.Where(e => tabNoteIDs.ElementAt(i) == e.ID).Include(e => e.Notes).SelectMany(e => e.Notes).ToListAsync() ?? new List<Note>()
+                    }   
+                ); 
+            }
+
+            return tabNoteObjects;
         }
 
         public async Task<Tab?> UpdateTab(Tab tab)
