@@ -52,13 +52,13 @@ namespace Styria.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<TabNote>> CreateTabNote(TabNote tabNote)
+        public async Task<ActionResult<TabNote>> CreateTabNote(TabNoteCreateObject tabNoteCreateObject)
         {
             try
             {
-                if (tabNote == null) { return BadRequest(); }
+                if (tabNoteCreateObject == null) { return BadRequest(); }
 
-                var result = await _tabNoteRepository.AddTabNote(tabNote);
+                var result = await _tabNoteRepository.AddTabNote(tabNoteCreateObject);
 
                 return CreatedAtAction(nameof(GetTabNote), new { ID = result.ID }, result);
             }

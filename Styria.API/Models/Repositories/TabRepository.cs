@@ -8,11 +8,11 @@ namespace Styria.API.Models.Repositories
     {
         Task<Tab> GetTabBySong(int songId);
         Task<Tab> GetTab(int id);
-        Task<Tab> AddTab(Tab tab);
+        Task<Tab> AddTab(TabCreateObject tabNoteCreateObject);
         Task<Tab?> UpdateTab(Tab tab);
         Task DeleteTab(int id);
         Task<bool> Exists(int id);
-        Task<IEnumerable<TabNoteObject>> GetTabNotes(int id);
+        Task<IEnumerable<TabNote>> GetTabNotes(int id);
     }
 
     public class TabRepository : ITabRepository
@@ -25,10 +25,16 @@ namespace Styria.API.Models.Repositories
             _dbContext = appDBContext;
         }
 
-        public async Task<Tab> AddTab(Tab tab)
+        public async Task<Tab> AddTab(TabCreateObject tabNoteCreateObject)
         {
+            Tab tab = new Tab { 
+                TimeSignatureID = tabNoteCreateObject.TimeSignatureID,
+                SongID = tabNoteCreateObject.SongID,
+            };
+
             var result = await _dbContext.Tabs.AddAsync(tab);
             await _dbContext.SaveChangesAsync();
+
             return result.Entity;
         }
 
@@ -57,25 +63,11 @@ namespace Styria.API.Models.Repositories
             return await _dbContext.Tabs.Include(x => x.TabNotes).Include(x => x.TimeSignature).FirstOrDefaultAsync(x => x.SongID == songId) ?? new Tab();
         }
         
-        public async Task<IEnumerable<TabNoteObject>> GetTabNotes(int id)
+        public async Task<IEnumerable<TabNote>> GetTabNotes(int id)
         {
             IEnumerable<int> tabNoteIDs = await _dbContext.TabNotes.Include(e => e.Effect).Where(e => e.TabID == id).Select(e => e.ID).ToListAsync() ?? new List<int>();
 
-
-            List<TabNoteObject> tabNoteObjects = new List<TabNoteObject>(tabNoteIDs.Count());
-
-            for(int i = 0; i < tabNoteIDs.Count(); i++)
-            {
-                tabNoteObjects.Add(
-                    new TabNoteObject 
-                    {
-                        TabNoteID = tabNoteIDs.ElementAt(i), 
-                        Notes = await _dbContext.TabNotes.Where(e => tabNoteIDs.ElementAt(i) == e.ID).Include(e => e.Notes).SelectMany(e => e.Notes).ToListAsync() ?? new List<Note>()
-                    }   
-                ); 
-            }
-
-            return tabNoteObjects;
+            return await _dbContext.TabNotes.Include(e => e.Effect).Include(e => e.Notes).Where(e => e.TabID == id).ToListAsync() ?? new List<TabNote>();
         }
 
         public async Task<Tab?> UpdateTab(Tab tab)

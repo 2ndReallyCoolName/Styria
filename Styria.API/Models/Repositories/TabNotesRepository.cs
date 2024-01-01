@@ -9,7 +9,7 @@ namespace Styria.API.Models.Repositories
         Task<IEnumerable<TabNote>> GetTabNotesByTabID(int tabId);
         Task<TabNote> GetTabNote(int id);
         Task<IEnumerable<Note?>> GetNotes(int id);
-        Task<TabNote> AddTabNote(TabNote tabNote);
+        Task<TabNote> AddTabNote(TabNoteCreateObject tabNoteCreateObject);
         Task<TabNote?> UpdateTabNote(TabNote tabNote);
         Task<TabNoteObject> UpdateNotes(TabNoteObject tabNoteObject);
         Task DeleteTabNote(int id);
@@ -26,18 +26,22 @@ namespace Styria.API.Models.Repositories
             _dbContext = appDBContext;
         }
 
-        public async Task<TabNote> AddTabNote(TabNote tabNote)
+        public async Task<TabNote> AddTabNote(TabNoteCreateObject tabNoteCreateObject)
         {
+            TabNote tabNote = new TabNote
+            {
+                Duration = tabNoteCreateObject.Duration,
+                Order = tabNoteCreateObject.Order,
+                EffectID = tabNoteCreateObject.EffectID,
+                TabID = tabNoteCreateObject.TabID
+            };
+
+            foreach(int noteID in tabNoteCreateObject.NoteIDs)
+            {
+                tabNote.Notes.Add(await _dbContext.Notes.FirstAsync(e => e.ID  == noteID));
+            }
+
             var result = await _dbContext.TabNotes.AddAsync(tabNote);
-            await _dbContext.SaveChangesAsync();
-
-            //foreach(NoteTabNote noteTabNote in tabNote.NoteTabNotes)
-            //{
-            //    noteTabNote.TabNoteID = tabNote.ID;
-            //    noteTabNote.TabNote = tabNote;
-            //    await _dbContext.NoteTabNotes.AddAsync(noteTabNote);
-            //}
-
             await _dbContext.SaveChangesAsync();
 
             return result.Entity;

@@ -56,39 +56,22 @@ namespace Styria.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Tab>> CreateTab(Tab tab)
+        public async Task<ActionResult<Tab>> CreateTab(TabCreateObject tabCreateObject)
         {
             try
             {
-                if(tab == null || tab.TabNotes == null) { return BadRequest(); }
+                if(tabCreateObject == null) { return BadRequest(); }
 
-                var result = await _tabRepository.AddTab(tab);
+                var result = await _tabRepository.AddTab(tabCreateObject);
 
-                foreach (var tabNote in tab.TabNotes)
-                { 
-                    if(! await _tabNoteRepository.Exists(tabNote.ID))
-                    {
-                        tabNote.TabID = tab.ID;
-                        await _tabNoteRepository.AddTabNote(tabNote);
-                    }
-                }
-
-                if(! await _timeSignatureRepository.Exists(tab.TimeSignatureID))
+                foreach (TabNoteCreateObject tabNoteCreateObject in tabCreateObject.TabNoteCreateObjects)
                 {
-                    if(tab.TimeSignature == null) { return BadRequest(); }
-
-                    if(tab.TimeSignature.Beats < 1 || tab.TimeSignature.Beats > 32 || tab.TimeSignature.NoteValue < 1 || tab.TimeSignature.NoteValue > 64
-                        || (tab.TimeSignature.NoteValue != 0) && ((tab.TimeSignature.NoteValue & (tab.TimeSignature.NoteValue - 1)) == 0))
-                    {
-                        return BadRequest();
-                    }
-
-                    await _timeSignatureRepository.AddTimeSignature(tab.TimeSignature);
+                    tabNoteCreateObject.TabID = result.ID;
+                    await _tabNoteRepository.AddTabNote(tabNoteCreateObject);
                 }
 
-                
                 return CreatedAtAction(nameof(GetTab), new {ID = result.ID}, result);
-            }
+            } 
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
