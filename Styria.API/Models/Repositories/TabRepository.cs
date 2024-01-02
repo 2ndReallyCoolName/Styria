@@ -79,6 +79,7 @@ namespace Styria.API.Models.Repositories
                 result.TimeSignatureID = tab.TimeSignatureID;
                 result.SongID = tab.SongID;
 
+                await _dbContext.SaveChangesAsync();
                 return result;
             }
             return null;

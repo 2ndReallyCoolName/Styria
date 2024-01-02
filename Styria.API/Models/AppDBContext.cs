@@ -6,6 +6,7 @@ using Styria.Model.Song;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Diagnostics.Metrics;
 using Instrument = Styria.Model.Song.Instrument;
+using System.Diagnostics.Contracts;
 
 namespace Styria.API.Models
 {
@@ -23,6 +24,7 @@ namespace Styria.API.Models
         public DbSet<TimeSignature> TimeSignatures { get; set; }
         public DbSet<Type> Types { get; set; }
         public DbSet<TypeGroup> TypeGroups { get; set; }
+        public DbSet<NoteTabNote> NoteTabNote { get; set; }
 
 
         public DbSet<Artist> Artists { get; set; }
@@ -79,9 +81,14 @@ namespace Styria.API.Models
             // Time Signature
             modelBuilder.Entity<TimeSignature>().HasData(new TimeSignature { TimeSignatureID = 1, Beats = 4, NoteValue = 4 });
 
+            //NoteTabNotes
+            modelBuilder.Entity<NoteTabNote>()
+                .HasKey(c => new { c.TabNoteID, c.NoteID });
+
             // Notes
             //modelBuilder.Entity<Note>().HasOne(e => e.Instrument).WithMany(e => e.Notes).HasForeignKey(e => e.InstrumentID).IsRequired();
             seedNotes(modelBuilder);
+
 
             // TabNotes
             var t1 = new TabNote { ID = 1, Duration = 8, Order = 1, TabID = 1, EffectID = 2};
@@ -97,18 +104,18 @@ namespace Styria.API.Models
             var t11 = new TabNote { ID = 11, Duration = 8, Order = 11, TabID = 1 };
 
             modelBuilder.Entity<TabNote>().HasMany(e => e.Notes).WithMany()
-                .UsingEntity(nt => nt.HasData(
-                    new { TabNoteID = 1, NotesID = 45 },
-                    new { TabNoteID = 2, NotesID = 57 },
-                    new { TabNoteID = 3, NotesID = 45 },
-                    new { TabNoteID = 4, NotesID = 33 },
-                    new { TabNoteID = 5, NotesID = 46 },
-                    new { TabNoteID = 6, NotesID = 34 },
-                    new { TabNoteID = 7, NotesID = 46 },
-                    new { TabNoteID = 8, NotesID = 33 },
-                    new { TabNoteID = 9, NotesID = 45 },
-                    new { TabNoteID = 10, NotesID = 63 },
-                    new { TabNoteID = 11, NotesID = 57 }));
+                .UsingEntity<NoteTabNote>(nt => nt.HasData(
+                    new { TabNoteID = 1, NoteID = 45 },
+                    new { TabNoteID = 2, NoteID = 57 },
+                    new { TabNoteID = 3, NoteID = 45 },
+                    new { TabNoteID = 4, NoteID = 33 },
+                    new { TabNoteID = 5, NoteID = 46 },
+                    new { TabNoteID = 6, NoteID = 34 },
+                    new { TabNoteID = 7, NoteID = 46 },
+                    new { TabNoteID = 8, NoteID = 33 },
+                    new { TabNoteID = 9, NoteID = 45 },
+                    new { TabNoteID = 10, NoteID = 63 },
+                    new { TabNoteID = 11, NoteID = 57 }));
 
 
             modelBuilder.Entity<TabNote>().HasData(t1);

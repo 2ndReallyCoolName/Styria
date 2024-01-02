@@ -22,78 +22,6 @@ namespace Styria.API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("NoteTabNote", b =>
-                {
-                    b.Property<int>("NotesID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TabNoteID")
-                        .HasColumnType("int");
-
-                    b.HasKey("NotesID", "TabNoteID");
-
-                    b.HasIndex("TabNoteID");
-
-                    b.ToTable("NoteTabNote");
-
-                    b.HasData(
-                        new
-                        {
-                            NotesID = 45,
-                            TabNoteID = 1
-                        },
-                        new
-                        {
-                            NotesID = 57,
-                            TabNoteID = 2
-                        },
-                        new
-                        {
-                            NotesID = 45,
-                            TabNoteID = 3
-                        },
-                        new
-                        {
-                            NotesID = 33,
-                            TabNoteID = 4
-                        },
-                        new
-                        {
-                            NotesID = 46,
-                            TabNoteID = 5
-                        },
-                        new
-                        {
-                            NotesID = 34,
-                            TabNoteID = 6
-                        },
-                        new
-                        {
-                            NotesID = 46,
-                            TabNoteID = 7
-                        },
-                        new
-                        {
-                            NotesID = 33,
-                            TabNoteID = 8
-                        },
-                        new
-                        {
-                            NotesID = 45,
-                            TabNoteID = 9
-                        },
-                        new
-                        {
-                            NotesID = 63,
-                            TabNoteID = 10
-                        },
-                        new
-                        {
-                            NotesID = 57,
-                            TabNoteID = 11
-                        });
-                });
-
             modelBuilder.Entity("Styria.Model.Music.Effect", b =>
                 {
                     b.Property<int>("ID")
@@ -12238,6 +12166,78 @@ namespace Styria.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Styria.Model.Music.NoteTabNote", b =>
+                {
+                    b.Property<int>("TabNoteID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NoteID")
+                        .HasColumnType("int");
+
+                    b.HasKey("TabNoteID", "NoteID");
+
+                    b.HasIndex("NoteID");
+
+                    b.ToTable("NoteTabNote");
+
+                    b.HasData(
+                        new
+                        {
+                            TabNoteID = 1,
+                            NoteID = 45
+                        },
+                        new
+                        {
+                            TabNoteID = 2,
+                            NoteID = 57
+                        },
+                        new
+                        {
+                            TabNoteID = 3,
+                            NoteID = 45
+                        },
+                        new
+                        {
+                            TabNoteID = 4,
+                            NoteID = 33
+                        },
+                        new
+                        {
+                            TabNoteID = 5,
+                            NoteID = 46
+                        },
+                        new
+                        {
+                            TabNoteID = 6,
+                            NoteID = 34
+                        },
+                        new
+                        {
+                            TabNoteID = 7,
+                            NoteID = 46
+                        },
+                        new
+                        {
+                            TabNoteID = 8,
+                            NoteID = 33
+                        },
+                        new
+                        {
+                            TabNoteID = 9,
+                            NoteID = 45
+                        },
+                        new
+                        {
+                            TabNoteID = 10,
+                            NoteID = 63
+                        },
+                        new
+                        {
+                            TabNoteID = 11,
+                            NoteID = 57
+                        });
+                });
+
             modelBuilder.Entity("Styria.Model.Music.Tab", b =>
                 {
                     b.Property<int>("ID")
@@ -12614,21 +12614,6 @@ namespace Styria.API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("NoteTabNote", b =>
-                {
-                    b.HasOne("Styria.Model.Music.Note", null)
-                        .WithMany()
-                        .HasForeignKey("NotesID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Styria.Model.Music.TabNote", null)
-                        .WithMany()
-                        .HasForeignKey("TabNoteID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Styria.Model.Music.Note", b =>
                 {
                     b.HasOne("Styria.Model.Song.Instrument", "Instrument")
@@ -12644,6 +12629,21 @@ namespace Styria.API.Migrations
                     b.Navigation("Instrument");
 
                     b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("Styria.Model.Music.NoteTabNote", b =>
+                {
+                    b.HasOne("Styria.Model.Music.Note", null)
+                        .WithMany()
+                        .HasForeignKey("NoteID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Styria.Model.Music.TabNote", null)
+                        .WithMany("NoteTabNotes")
+                        .HasForeignKey("TabNoteID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Styria.Model.Music.Tab", b =>
@@ -12716,6 +12716,11 @@ namespace Styria.API.Migrations
             modelBuilder.Entity("Styria.Model.Music.Tab", b =>
                 {
                     b.Navigation("TabNotes");
+                });
+
+            modelBuilder.Entity("Styria.Model.Music.TabNote", b =>
+                {
+                    b.Navigation("NoteTabNotes");
                 });
 
             modelBuilder.Entity("Styria.Model.Music.TimeSignature", b =>

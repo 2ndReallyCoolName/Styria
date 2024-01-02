@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -24,5 +25,7 @@ namespace Styria.Model.Music
         public Tab? Tab { get; set; }
 
         public List<Note> Notes { get; set; } = new();
+
+        public virtual List<NoteTabNote> NoteTabNotes { get; set; } = new List<NoteTabNote>();
     }
 }

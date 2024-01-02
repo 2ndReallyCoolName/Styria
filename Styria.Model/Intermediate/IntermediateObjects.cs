@@ -41,4 +41,18 @@ namespace Styria.Model.Intermediate
         public List<TabNoteCreateObject> TabNoteCreateObjects { get; set; } = new List<TabNoteCreateObject>();
 
     }
+
+    public class TabNoteUpdateObject
+    {
+        [Required]
+        public int TabNoteID { get; set; }
+        [Required]
+        public int Duration { get; set; }
+
+        [Required]
+        public int Order { get; set; }
+        public int? EffectID { get; set; }
+
+        public List<int> NoteIDs { get; set; } = new List<int>();
+    }
 }

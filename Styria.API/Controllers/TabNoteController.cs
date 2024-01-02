@@ -69,15 +69,15 @@ namespace Styria.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<TabNote>> UpdateTabNote(int id, TabNote tabNote)
+        public async Task<ActionResult<TabNote>> UpdateTabNote(int id, TabNoteUpdateObject tabNoteUpdateObject)
         {
             try
             {
-                if (id != tabNote.ID) { return BadRequest(); }
+                if (id != tabNoteUpdateObject.TabNoteID) { return BadRequest(); }
 
                 if (!await _tabNoteRepository.Exists(id)) { return NotFound(); }
 
-                var result = await _tabNoteRepository.UpdateTabNote(tabNote);
+                var result = await _tabNoteRepository.UpdateTabNote(tabNoteUpdateObject);
 
                 if (result == null) { return StatusCode(StatusCodes.Status500InternalServerError); }
 
@@ -89,30 +89,6 @@ namespace Styria.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
-
-
-        [HttpPut("{id:int}/notes")]
-        public async Task<ActionResult<TabNoteObject>> UpdateNotes(int id, TabNoteObject tabNote)
-        {
-            try
-            {
-                if (id != tabNote.TabNoteID && ! await _tabNoteRepository.Exists(id)) { return BadRequest(); }
-
-                if (!await _tabNoteRepository.Exists(id)) { return NotFound(); }
-
-                var result = await _tabNoteRepository.UpdateNotes(tabNote);
-
-                if (result == null) { return StatusCode(StatusCodes.Status500InternalServerError); }
-
-                return result;
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-
 
     }
 }

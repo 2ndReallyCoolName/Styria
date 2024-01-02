@@ -10,8 +10,7 @@ namespace Styria.API.Models.Repositories
         Task<TabNote> GetTabNote(int id);
         Task<IEnumerable<Note?>> GetNotes(int id);
         Task<TabNote> AddTabNote(TabNoteCreateObject tabNoteCreateObject);
-        Task<TabNote?> UpdateTabNote(TabNote tabNote);
-        Task<TabNoteObject> UpdateNotes(TabNoteObject tabNoteObject);
+        Task<TabNote?> UpdateTabNote(TabNoteUpdateObject tabNoteUpdateObject);
         Task DeleteTabNote(int id);
         Task<bool> Exists(int id);
     }
@@ -52,13 +51,7 @@ namespace Styria.API.Models.Repositories
             var result = await _dbContext.TabNotes.FirstOrDefaultAsync(e => e.ID == id);
             if (result != null)
             {
-                //IEnumerable<NoteTabNote> noteTabNotes = await _dbContext.NoteTabNotes.Where(e => e.TabNoteID == id).ToListAsync();
-
-                //foreach(NoteTabNote noteTab in noteTabNotes)
-                //{
-                //    _dbContext.NoteTabNotes.Remove(noteTab);
-                //}
-
+             
                 _dbContext.TabNotes.Remove(result);
                 await _dbContext.SaveChangesAsync();
             }
@@ -66,7 +59,7 @@ namespace Styria.API.Models.Repositories
 
         public async Task<TabNote> GetTabNote(int id)
         {
-            return await _dbContext.TabNotes.Include(e => e.Effect).FirstOrDefaultAsync(x => x.ID == id) ?? new TabNote();
+            return await _dbContext.TabNotes.Include(e => e.Effect).Include(e => e.Notes).FirstOrDefaultAsync(x => x.ID == id) ?? new TabNote();
         }
 
         public async Task<IEnumerable<TabNote>> GetTabNotesByTabID(int tabId)
@@ -79,45 +72,40 @@ namespace Styria.API.Models.Repositories
             return await _dbContext.TabNotes.AnyAsync(x => x.ID == id);
         }
 
-        public async Task<TabNote?> UpdateTabNote(TabNote TabNote)
-        {
-            var result = await _dbContext.TabNotes.FirstOrDefaultAsync(e => e.ID != TabNote.ID);
-
-            if (result != null)
-            {
-                result.Duration = TabNote.Duration;
-                result.Order = TabNote.Order;
-                result.EffectID = TabNote.EffectID;
-
-                return result;
-            }
-            return null;
-        }
 
         public async Task<IEnumerable<Note?>> GetNotes(int id)
         {
             return await _dbContext.TabNotes.Where(e => e.ID == id).Include(e => e.Notes).SelectMany(e => e.Notes).ToListAsync() ?? new List<Note>();
         }
 
-        public async Task< TabNoteObject> UpdateNotes(TabNoteObject tabNoteObject)
+        public async Task<TabNote?> UpdateTabNote(TabNoteUpdateObject tabNoteUpdateObject)
         {
-            //IEnumerable<NoteTabNote> noteTabNotes = await _dbContext.TabN.Where(e => e.TabNoteID == tabNoteObject.TabNoteID).ToListAsync();
+            var tabNote = await _dbContext.TabNotes.FirstOrDefaultAsync(e => e.ID == tabNoteUpdateObject.TabNoteID);
 
-            //foreach (NoteTabNote noteTab in noteTabNotes)
-            //{
-            //    _dbContext.NoteTabNotes.Remove(noteTab);
-            //}
-
-            foreach(Note note in tabNoteObject.Notes)
+            if (tabNote != null)
             {
-                Note _n = await _dbContext.Notes.FirstOrDefaultAsync(e => e.String == note.String && e.TypeID == note.TypeID && e.Fret == note.Fret) ?? new Note();
-                //if(_n != null)
-                //{
-                //    await _dbContext.NoteTabNotes.AddAsync(new NoteTabNote { NoteID = _n.ID, TabNoteID = tabNoteObject.TabNoteID});
-                //}
+                tabNote.Duration = tabNoteUpdateObject.Duration;
+                tabNote.Order = tabNoteUpdateObject.Order;
+                tabNote.EffectID = tabNoteUpdateObject.EffectID;
+
+                List<NoteTabNote> noteTabNotes = await _dbContext.NoteTabNote.Where(e => e.TabNoteID == tabNoteUpdateObject.TabNoteID).ToListAsync();
+
+                foreach(NoteTabNote noteTabNote in noteTabNotes)
+                {
+                    _dbContext.NoteTabNote.Remove(noteTabNote);
+                }
+
+                foreach (int noteID in tabNoteUpdateObject.NoteIDs)
+                {
+                    tabNote.Notes.Add(await _dbContext.Notes.FirstAsync(e => e.ID == noteID));
+                }
+
+                await _dbContext.SaveChangesAsync();    
+
+                return tabNote;
             }
 
-            return new TabNoteObject();
+            return null;
 
         }
     }
